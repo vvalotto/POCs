@@ -5,11 +5,11 @@ from paquete_datos import *
 
 class AbsComando(metaclass=ABCMeta):
 
-    def __init__(self, destinatario, comando):
+    def __init__(self, destinatario, comando, respuesta):
         self._destinatario = destinatario
         self._comando = comando
+        self._respuesta = respuesta
 
-    @staticmethod
     @abstractmethod
     def ejecutar(self):
         pass
@@ -21,8 +21,9 @@ class LectorStatusHolter(AbsComando):
         # lee estatus del holter
         self._comando.armar_comando()
         self._destinatario.enviar(self._comando.paquete)
-        print(self._comando.paquete)
-        self._destinatario.recibir()
+        print(type(self._comando))
+        estado = self._destinatario.recibir()
+        return self._respuesta.desarmar_respuesta(estado)
 
 
 class LectorConfiguracionHolter(AbsComando):
@@ -32,11 +33,8 @@ class LectorConfiguracionHolter(AbsComando):
         self._comando.armar_comando()
         self._destinatario.enviar(self._comando.paquete)
         print(self._comando.paquete)
-        self._destinatario.recibir()
-
-
-class IdentificadorHolter(AbsComando):
-    pass
+        configuracion = self._destinatario.recibir()
+        # self._respuesta.desarmar_respuesta(configuracion)
 
 
 class ObtenerMemoria(AbsComando):
@@ -53,8 +51,13 @@ class ObtenerEGC(AbsComando):
 
 class PonerHora(AbsComando):
 
-
-    pass
+    def ejecutar(self):
+        # Poner la hora holter
+        self._comando.armar_comando()
+        self._destinatario.enviar(self._comando.paquete)
+        print(self._comando.paquete)
+        respuesta_OK = self._destinatario.recibir()
+        self._respuesta.desarmar_respuesta(respuesta_OK)
 
 
 class PonerModo(AbsComando):
@@ -80,11 +83,12 @@ class Destinatario:
 
     def enviar(self, paquete):
         print(self._tipo_vinculo)
-        print('Enviar paquete')
+        self._tipo_vinculo.enviar(paquete)
 
     def recibir(self):
         print(self._tipo_vinculo)
-        print('Recibir paquete')
+        paquete = self._tipo_vinculo.recibir()
+        return paquete
 
 
 class Invocador:
