@@ -1,15 +1,17 @@
-from paquete_datos import *
+from socket import timeout
+from holter_comands import *
 from abc import ABCMeta, abstractmethod
-from paquete_datos import *
+from holter_comands import *
+from enlace import *
 
 
 class AbsComando(metaclass=ABCMeta):
 
-    def __init__(self, destinatario, comando):
+    def __init__(self, destinatario, comando, respuesta):
         self._destinatario = destinatario
         self._comando = comando
+        self._respuesta = respuesta
 
-    @staticmethod
     @abstractmethod
     def ejecutar(self):
         pass
@@ -18,12 +20,16 @@ class AbsComando(metaclass=ABCMeta):
 class LectorStatusHolter(AbsComando):
 
     def ejecutar(self):
-        # lee estatus del holter
+        # Lee estatus del holter
         self._comando.armar_comando()
         self._destinatario.enviar(self._comando.paquete)
         print(self._comando.paquete)
-        self._destinatario.recibir()
-
+        paquete_recibido = self._destinatario.recibir(1)
+        print ('paquete', paquete_recibido)       
+        self._respuesta.desarmar_respuesta(paquete_recibido)
+        self._destinatario.desenlazar()
+        return self._respuesta.guardar_estado()
+        
 
 class LectorConfiguracionHolter(AbsComando):
 
@@ -32,8 +38,9 @@ class LectorConfiguracionHolter(AbsComando):
         self._comando.armar_comando()
         self._destinatario.enviar(self._comando.paquete)
         print(self._comando.paquete)
-        self._destinatario.recibir()
-
+        configuracion = self._destinatario.recibir(1)
+        return self._respuesta.desarmar_respuesta(configuracion)
+        
 
 class IdentificadorHolter(AbsComando):
     pass
@@ -52,13 +59,28 @@ class ObtenerEGC(AbsComando):
 
 
 class PonerHora(AbsComando):
-
-
     pass
 
 
 class PonerModo(AbsComando):
     pass
+
+
+class PonerModoMonitoreo(AbsComando):
+    def ejecutar(self):
+        # Activar modo monitoreo
+        self._comando.armar_comando()
+        self._destinatario.enviar(self._comando.paquete)
+        print(self._comando.paquete)
+        # Recepción de confirmación
+        confirmacion = self._destinatario.recibir(1)
+        return self._respuesta.desarmar_respuesta(confirmacion)
+
+
+class GetECGMonitor(AbsComando):
+    def ejecutar(self):
+        datos_ecg_monitoreo = self._destinatario.recibir(4)
+        return self._respuesta.desarmar_respuesta(datos_ecg_monitoreo)
 
 
 class PonerConfiguracion(AbsComando):
@@ -69,22 +91,38 @@ class BorrarMemoria(AbsComando):
     pass
 
 
-class PararHolter(AbsComando):
-    pass
+class HolterDisconnect(AbsComando):
+    def ejecutar(self):
+        self._destinatario.desenlazar()
 
+
+class PararHolter(AbsComando):
+    
+    def ejecutar(self):
+        # Activar modo idle y desenlazar holter
+        self._comando.armar_comando()
+        self._destinatario.enviar(self._comando.paquete)
+        print('Para holter:', self._comando.paquete)
+        configuracion = self._destinatario.recibir()
+        self._destinatario.desenlazar()
+        return self._respuesta.desarmar_respuesta(configuracion)
+        
 
 class Destinatario:
-
+    
     def __init__(self, tipo_vinculo):
         self._tipo_vinculo = tipo_vinculo
 
     def enviar(self, paquete):
-        print(self._tipo_vinculo)
-        print('Enviar paquete')
+        print(type(self._tipo_vinculo))
+        self._tipo_vinculo.conectar()
+        self._tipo_vinculo.enviar(paquete)
 
-    def recibir(self):
-        print(self._tipo_vinculo)
-        print('Recibir paquete')
+    def recibir(self, amount_packages = 1):
+        return self._tipo_vinculo.recibir(amount_packages)
+    
+    def desenlazar(self):
+        self._tipo_vinculo.desconectar()
 
 
 class Invocador:
@@ -97,8 +135,7 @@ class Invocador:
 
     def ejecutar(self, nombre):
         if nombre in self._comandos.keys():
-            self._comandos[nombre].ejecutar()
+            recibido = self._comandos[nombre].ejecutar()
+            return recibido
         else:
             raise 'Comando no reconocido'
-
-
