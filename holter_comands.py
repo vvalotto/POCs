@@ -35,7 +35,9 @@ class ComandoHolter(metaclass=ABCMeta):
 
 
 class ComandEmpty(ComandoHolter):
-    pass
+    
+    def armar_comando(self, payload=None):
+        pass
 
 
 class ComandoLecturaStatusEnvio(ComandoHolter):
