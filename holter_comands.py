@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 
 
 class ComandoHolter(metaclass=ABCMeta):
-    LARGO_PAQUETE = 13
+    PACKAGE_LENGTH = 13
 
     @property
     def paquete(self):
@@ -21,7 +21,7 @@ class ComandoHolter(metaclass=ABCMeta):
     
     def _obtener_checksum(self, datos):
         checksum = 0
-        for i in range(self.LARGO_PAQUETE - 1):
+        for i in range(self.PACKAGE_LENGTH - 1):
             checksum ^= datos[i]
         return checksum
 
@@ -80,6 +80,7 @@ class RespuestaHolter(metaclass=ABCMeta):
     
     PACKAGE_LENGTH = 13
     ANSWER_OK = b'\xa5\x0A\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xaf'
+    
 
     @property
     def paquete(self):
@@ -91,11 +92,18 @@ class RespuestaHolter(metaclass=ABCMeta):
         self._payload = None
         self._checksum = None
         self._datos = None
+        # self._datos = [b'x00' for i in range(self.PACKAGE_LENGTH)]
+        self._correct_answer = False
 
     @abstractmethod
     def desarmar_respuesta(self, datos):
         pass
-
+    
+    # @abstractmethod
+    @property
+    def authenticate_response (self):
+        return self._correct_answer
+        
     def _obtener_checksum(self, datos):
         checksum = 0
         for i in range(self.PACKAGE_LENGTH - 1):
@@ -113,10 +121,9 @@ class RespuestaHolter(metaclass=ABCMeta):
                 self._payload = datos[2:12]
                 self._checksum = checksum
                 self._datos = datos
-                print ("respuesta ok:", datos)
-
-            else: print('Paquete erróneo')
-        else: print ('Datos no recibidos')
+                print ("Checksum correcto.", datos)
+            else: print('Error de paquete. Checksum incorrecto.')
+        else: print ('Error de datos recibidos. "datos == None". Paquete no desarmado.')
 
 
 class RespuestaHolterStatus(RespuestaHolter):
@@ -125,14 +132,19 @@ class RespuestaHolterStatus(RespuestaHolter):
         self._desarmar_paquete(datos)
         return self._payload
 
+    def authenticate_response (self):
+        pass
+
     def guardar_estado(self):
-        print (self._datos)
         return self._datos
 
 
 class RespuestaHolterConfiguracion(RespuestaHolter):
 
     def desarmar_respuesta(self, datos):
+        pass
+
+    def authenticate_response (self):
         pass
 
 
@@ -150,7 +162,7 @@ class RespuestaHolterEGCMonitoreo(RespuestaHolter):
         channel_1 = []
         channel_2 = []
         channel_3 = []
-        print ((len(datos)/self.PACKAGE_LENGTH))
+        print ('Datos GetECG',(len(datos)/self.PACKAGE_LENGTH))
         for i in range (0, int (len(datos)/self.PACKAGE_LENGTH)):
             self._desarmar_paquete(datos[i*self.PACKAGE_LENGTH:(i+1)*self.PACKAGE_LENGTH])
             channel_1.append(self._payload[:3])
@@ -159,6 +171,12 @@ class RespuestaHolterEGCMonitoreo(RespuestaHolter):
         channels = [channel_1, channel_2, channel_3]
         return channels
 
+    def authenticate_response (self):
+        pass
+
+    # def _recuperar_paquetes(self):
+    #     header_position = self._datos.index(self.HEADER)
+    #     while()
 
 class RespuestaHolterEvento(RespuestaHolter):
     pass
@@ -169,9 +187,23 @@ class RespuestaHolterEGC(RespuestaHolter):
 
 
 class RespuestaHolterEscritiuraOK(RespuestaHolter):
+    
     def desarmar_respuesta(self, datos):
-        self._desarmar_paquete(datos)
-        return self._datos == self.ANSWER_OK
+
+        self._correct_answer = False
+
+        # if not float.is_integer(len(datos)/self.PACKAGE_LENGTH):
+        #     self._
+        for i in range (0, int (len(datos)/self.PACKAGE_LENGTH)):
+            self._desarmar_paquete(datos[i*self.PACKAGE_LENGTH:(i+1)*self.PACKAGE_LENGTH])
+            if self._datos == self.ANSWER_OK:
+                self._correct_answer = True
+                return self._payload
+
+        return self._payload
+
+    def authenticate_response (self):
+        return self._correct_answer
 
 
 class RespuestaHolterBorrado(RespuestaHolter):
@@ -179,5 +211,9 @@ class RespuestaHolterBorrado(RespuestaHolter):
 
 
 class RespuestaHolterApagado(RespuestaHolter):
+
     def desarmar_respuesta(self, datos):
+        pass
+
+    def authenticate_response (self):
         pass

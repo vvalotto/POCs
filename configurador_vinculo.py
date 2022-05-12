@@ -3,8 +3,8 @@ from holter_comands import *
 
 conexion_USB = EnlaceUSB()
 conexion_Dongle = EnlaceDongle()
-holter_por_usb = Destinatario(conexion_USB)
-# holter_por_usb = Destinatario(conexion_Dongle)
+# holter_por_usb = Destinatario(conexion_USB)
+holter_por_usb = Destinatario(conexion_Dongle)
 invocador = Invocador()
 
 # Leer Status Holter
@@ -19,7 +19,7 @@ invocador.registrar_comando("leer_configuracion",   LectorConfiguracionHolter(ho
                                                     RespuestaHolterConfiguracion()))
 
 # Parar Holter
-invocador.registrar_comando("parar_modo_holter",    PararHolter(holter_por_usb, 
+invocador.registrar_comando("parar_modo_holter",    SetIdleMode(holter_por_usb, 
                                                     ComandoEscrituraModoIdleEnvio(),
                                                     RespuestaHolterEscritiuraOK()))
 
@@ -33,7 +33,7 @@ invocador.registrar_comando("obtener_ecg_monitoreo",GetECGMonitor(holter_por_usb
                                                     ComandEmpty(),
                                                     RespuestaHolterEGCMonitoreo()))
 
-# Obtener ECG Monitoreo
-invocador.registrar_comando("desenlazar_holter",    HolterDisconnect (holter_por_usb, 
-                                                    ComandEmpty(),
-                                                    RespuestaHolterEGCMonitoreo()))
+# # desenlazar_holter
+# invocador.registrar_comando("desenlazar_holter",    HolterDisconnect (holter_por_usb, 
+#                                                     ComandEmpty(),
+#                                                     RespuestaHolterEscritiuraOK()))

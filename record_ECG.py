@@ -1,14 +1,16 @@
 from abc import ABCMeta, abstractmethod
-
+from threading import Lock
 
 class AbsECG(metaclass=ABCMeta):
     
     def __init__(self): #,datos):
-        
+        self._state: bool = None
         # self._datos = datos
-        self._channel_1 = []
-        self._channel_2 = []
-        self._channel_3 = []
+        self.lock = Lock()
+        with self.lock:
+            self._channel_1 = []
+            self._channel_2 = []
+            self._channel_3 = []
 
     abstractmethod    
     def separar_datos_canal(self):
@@ -28,7 +30,7 @@ class EventosECG(AbsECG):
 
 
 class MonitorECG(AbsECG):
-    state = True
+    # state = True
     def separar_datos_canal(self):
         self._canal_1 = self._datos [2:5]
         self._canal_2 = self.datos [5:8]

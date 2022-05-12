@@ -1,5 +1,7 @@
 from abc import abstractmethod, ABCMeta, ABC
 from importlib.resources import Package
+# from socket import timeout
+import time
 
 import serial
 from serial.tools.list_ports import comports
@@ -35,6 +37,13 @@ class AbsEnlace(metaclass=ABCMeta):
     def recibir(self, amount_packages = 1):
         pass
 
+    def _restart_parameters(self):
+        self._puerto = None
+        self._datos = None
+        self._uart_service = None
+        self._peer = None
+        self._ble_device = None
+
     def listar_puertos_series(self):
         puertos = list(comports())
         # for puerto in puertos:
@@ -66,10 +75,10 @@ class EnlaceUSB(AbsEnlace, ABC):
             pass
 
         try:
-            self._puerto = serial.Serial('COM15',115200)
+            self._puerto = serial.Serial('COM15',115200, timeout = 2)
             print ('Puerto enlazado')
         except:
-            print ('Puerto no enlazado')
+            print ('Error para enlazar puerto. Puerto no enlazado')
             pass
 
     def desconectar(self):
@@ -120,8 +129,8 @@ class EnlaceDongle(AbsEnlace, ABC):
         # Configure the BLE device to support MTU sizes which allow the max data length extension PDU size
         # Note this isn't 100% necessary as the default configuration sets the max to this value also
 
-        self._ble_device.configure(att_mtu_max_size=MTU_SIZE_FOR_MAX_DLE) ## --> modificar a 10 paquetes como MTU. ##
-        self._ble_device.open()
+        self._ble_device.configure(att_mtu_max_size=MTU_SIZE_FOR_MAX_DLE)
+        self._ble_device.open(clear_bonding_data=True)
 
         # Set scan duration for 4 seconds
         self._ble_device.scanner.set_default_scan_params(timeout_seconds=4)
@@ -136,49 +145,64 @@ class EnlaceDongle(AbsEnlace, ABC):
                 break
         if not target_address:
             print("No se encuentra el dispositivo Holter Bago")
+            self._ble_device.close()
             return
         # Initiate connection and wait for it to finish
         print("Holter Bago encontrado: conectando a {}".format(target_address))
         self._peer = self._ble_device.connect(target_address).wait()
         if not self._peer:
             print("Conexión caducada")
+            self.desconectar()
             return
 
         # Exchange MTU
         self._peer.exchange_mtu(self._peer.max_mtu_size).wait(10)
-
          # Initiate service discovery and wait for it to complete
         _, event_args = self._peer.discover_services().wait(exception_on_timeout=False)
-    
+
         self._uart_service = nordic_uart.find_nordic_uart_service(self._peer.database)
         if not self._uart_service:
             print("No se encuentra Nordic UART service")
-            self._peer.disconnect().wait()
-            self._ble_device.close()
+            self.desconectar()
             return
         # # # Initialize the service
         self._uart_service.initialize().wait(5)
         self._uart_service.on_data_received.register(self.on_data_rx)
-    
+        # time.sleep(0.100)
+
     def enviar(self, datos):
         try:
             self._uart_service.write(datos).wait(10)
             print('se enviaron los datos')
         except:
-            print ("No se enviaron los datos")
+            print ("Error en 'enviar'. No se enviaron los datos")
             pass
     
     def desconectar(self):
         try:
-            self._peer.disconnect().wait()
+            # self._peer.disconnect().wait()
+            # print ('peer se desconectó')
             self._ble_device.close()
+            print ('ble_device se desconectó')
+            self._restart_parameters()
+            # self._peer.disconnect().wait()
             print('Puerto desenlazado')
         except:
             print ('Error de desconexión. El puerto indicado no se encontraba enlazado')
             pass
 
     def recibir(self, amount_packages):
-        print (self._datos)
+
+        print ('en recibir ',self._datos)
+
+        try:
+            print ('recibir', len(self._datos))
+            if not float.is_integer(len(self._datos)/self.PACKAGE_LENGTH):
+                print ('Se perdieron datos. Se reiniciará la conexión')
+                self.desconectar()
+                return [False]
+        except:
+            pass
         return self._datos
     
     def on_data_rx(self, service, data):

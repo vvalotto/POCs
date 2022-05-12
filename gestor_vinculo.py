@@ -1,3 +1,4 @@
+from platform import release
 import time
 from comando import Invocador
 
@@ -8,7 +9,7 @@ class GestorVinculo:
         self._invocador = invocador
 
     def obtener_status_holter(self):
-        a = self._invocador.ejecutar("leer_estado")
+        self._invocador.ejecutar("leer_estado")
 
     def obtener_configuracion_holter(self):
         self._invocador.ejecutar("leer_configuracion")
@@ -18,19 +19,26 @@ class GestorVinculo:
         self._invocador.ejecutar("poner_configuracion")
 
     def poner_modo_monitoreo(self):
-        confirmacion = self._invocador.ejecutar("poner_modo_monitoreo")
-        print ('Poner modo monitoreo: ', confirmacion)
+        self._invocador.ejecutar("poner_modo_monitoreo")
+        time.sleep(1)
 
-    def monitorear_holter(self, monitor_ecg):
-        timeout = time.time()+1
-        while (time.time() < timeout and monitor_ecg.state):
+    def monitorear_holter(self, monitor_ecg, lock_monitor,event_monitor):
+        timeout = time.time()+0.5
+        while (time.time() < timeout):# and monitor_ecg.state):
             channels = self._invocador.ejecutar("obtener_ecg_monitoreo")
-            monitor_ecg.channel_1 = channels[0]
-            monitor_ecg.channel_2 = channels[1]
-            monitor_ecg.channel_3 = channels[2]
+            with lock_monitor:
+                if not monitor_ecg._channel_1 == channels[0]:
+                    monitor_ecg._channel_1 = channels[0].copy()
+                    monitor_ecg._channel_2 = channels[1].copy()
+                    monitor_ecg._channel_3 = channels[2].copy()
+                    print ('GESTOR VINCULO')
+                    print (monitor_ecg._channel_1)
+                    print (monitor_ecg._channel_2)
+                    print (monitor_ecg._channel_3)
+                    event_monitor.set()            
 
     def parar_holter(self): # modo IDLE
         self._invocador.ejecutar("parar_modo_holter")
 
-    def desenlazar_holter(self):
-        self._invocador.ejecutar("desenlazar_holter")
+    # def desenlazar_holter(self):
+    #     self._invocador.ejecutar("desenlazar_holter")
