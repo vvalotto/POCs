@@ -162,7 +162,7 @@ class RespuestaHolterEGCMonitoreo(RespuestaHolter):
         channel_1 = []
         channel_2 = []
         channel_3 = []
-        print ('Datos GetECG',(len(datos)/self.PACKAGE_LENGTH))
+        # print ('Datos GetECG',(len(datos)/self.PACKAGE_LENGTH))
         for i in range (0, int (len(datos)/self.PACKAGE_LENGTH)):
             self._desarmar_paquete(datos[i*self.PACKAGE_LENGTH:(i+1)*self.PACKAGE_LENGTH])
             channel_1.append(self._payload[:3])

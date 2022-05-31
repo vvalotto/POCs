@@ -205,9 +205,17 @@ class Destinatario:
 
 
 class Invocador:
+    @property
+    def link_type(self):
+        return self._link_type
+    @link_type.setter
+    def link_type(self, value):
+        self._link_type = value
 
+        
     def __init__(self):
         self._comandos = {}
+        self._link_type = None
 
     def registrar_comando(self, nombre, comando):
         self._comandos[nombre] = comando
@@ -218,3 +226,5 @@ class Invocador:
             return recibido
         else:
             raise 'Comando no reconocido'
+    
+    

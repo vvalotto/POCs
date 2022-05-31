@@ -67,22 +67,24 @@ class MonitoreoSubjet(AbsSubjet):
         self.notify()
 
 
-class ObserverMonitorDOT(AbsObserver):
-    def __init__(self,objet_monitor) -> None:
+class ObserverMonitorDTO(AbsObserver):
+    def __init__(self,objet_monitor, ploter) -> None:
         self._ecg_monitor = objet_monitor
+        self.ploter = ploter
+        self.ploter._channel_1 = self._ecg_monitor._channel_1
 
 
     def update(self, subject: MonitoreoSubjet) -> None:
         print("ConcreteObserverA: Reacted to the event")
         print ('Vincular con el presentador')
         print ('OBSERVADOR')
-        print (self._ecg_monitor._channel_1)
-        print (self._ecg_monitor._channel_2)
-        print (self._ecg_monitor._channel_3)
-        
-        # if subject._state < 3:
-        #     print("ConcreteObserverA: Reacted to the event")
-
+        # print (self._ecg_monitor._channel_1)
+        # print (self._ecg_monitor._channel_2)
+        # print (self._ecg_monitor._channel_3)
+        self.ploter._channel_1 = self._ecg_monitor._channel_1
+        self.ploter.data_update()
+        self.ploter.refresh_buffer()
+        self.ploter.update_buffer_data()
 
 
 # if __name__ == "__main__":
