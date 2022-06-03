@@ -8,7 +8,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtCore import QObject, QTimer, Slot, Signal, QPointF#, QTime
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCharts import QAbstractSeries #, QDateTimeAxis
-
+ 
 
 class Plotter(QObject):
 
@@ -75,7 +75,7 @@ class show_monitor():
 # if __name__ == "__main__":
 #     app = QApplication(sys.argv)
 #     engine = QQmlApplicationEngine()
-#     engine.load(os.fspath(Path(__file__).resolve().parent / "main.qml"))
+#     engine.load(os.fspath(Path(__file__).resolve().parent / "main_monitor.qml"))
 
 #     plot = Plotter()
 #     engine.rootObjects()[0].setProperty('plotter', plot)

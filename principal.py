@@ -26,7 +26,7 @@ from observer import *
 from threading import Thread
 from threading import Lock
 from threading import Event
-from plot import main
+from monitor import main
 from vinculo_DTO import MonitoreoDTO
 
 """ Objeto graficador"""
@@ -87,10 +87,10 @@ t_1.start()
 t_2.start()
 
 
+
 show.main()
-t_1.join()
-t_2.join()
-print (t_2.is_alive())
+t_1.join(20)
+t_2.join(20)
 
 
 

@@ -23,7 +23,7 @@ class GestorVinculo:
         time.sleep(1)
 
     def monitorear_holter(self, monitor_ecg, lock_monitor,event_monitor):
-        timeout = time.time()+8.5
+        timeout = time.time()+10.5
         while (time.time() < timeout):# and monitor_ecg.state):
             channels = self._invocador.ejecutar("obtener_ecg_monitoreo")
             with lock_monitor:
