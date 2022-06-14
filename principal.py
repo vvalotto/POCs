@@ -54,9 +54,10 @@ invocador = configurador_vinculo.init_invocator(link_usb)
 """ Gestor de vínculo """
 
 gestor = GestorVinculo(invocador)
-# gestor.obtener_status_holter()
+gestor.obtener_status_holter()
 # time.sleep(3)
-gestor.parar_holter()
+# gestor.parar_holter()
+# gestor.desenlazar_holter()
 time.sleep(3)
 """ Threading: evento y bloqueo """
 event_monitor = Event()

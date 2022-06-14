@@ -4,7 +4,7 @@ from threading import Lock
 class AbsECG(metaclass=ABCMeta):
     
     def __init__(self): #,datos):
-        self._state: bool = None
+        self._state: True # bool = None
         # self._datos = datos
         self.lock = Lock()
         with self.lock:
@@ -35,3 +35,10 @@ class MonitorECG(AbsECG):
         self._canal_1 = self._datos [2:5]
         self._canal_2 = self.datos [5:8]
         self._canal_3 = self.datos [8:11]
+    
+    @property
+    def state(self):
+        return self._state
+    @state.setter
+    def state(self,value):
+        self._state = value

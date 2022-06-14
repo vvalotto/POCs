@@ -1,17 +1,10 @@
 # from multiprocessing import connection
 from comando import *
 from holter_comands import *
-connection_type = None
-invocador = None
-holter_connected_to = None
-# holter_por_usb = Destinatario(conexion_USB)
-# holter_por_usb = Destinatario(conexion_Dongle)
-# def init_invocator(link):
-def init_invocator(link = str):#->str('USB_CONNECTION'):
-    global connection_type
-    global invocador
-    global holter_connected_to
-    connection_type = link
+
+
+def init_invocator(connection_type):#->str('USB_CONNECTION'):
+
     if connection_type == 'USB_CONNECTION':
         connection_type = EnlaceUSB()
 
@@ -22,9 +15,6 @@ def init_invocator(link = str):#->str('USB_CONNECTION'):
 
     invocador = Invocador()
    
-
-
-
 # Leer Status Holter
     comando = ComandoLecturaStatusEnvio()
     invocador.registrar_comando("leer_estado", LectorStatusHolter(holter_connected_to, 
@@ -51,8 +41,8 @@ def init_invocator(link = str):#->str('USB_CONNECTION'):
                                                     ComandEmpty(),
                                                     RespuestaHolterEGCMonitoreo()))
 
-# # desenlazar_holter
-# invocador.registrar_comando("desenlazar_holter",    HolterDisconnect (holter_por_usb, 
-#                                                     ComandEmpty(),
-#                                                     RespuestaHolterEscritiuraOK()))
+# desenlazar_holter
+    invocador.registrar_comando("desenlazar_holter",    HolterDisconnect (holter_connected_to, 
+                                                    ComandEmpty(),
+                                                    RespuestaHolterEscritiuraOK()))
     return invocador

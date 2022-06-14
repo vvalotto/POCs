@@ -43,6 +43,7 @@ Item {
                     anchors.top: descriptionMonitor.bottom
                     anchors.topMargin: 30
                     anchors.left: descriptionMonitor.left
+                    
                 }
                 TextInput {
                     id: inputInitRate
@@ -60,6 +61,38 @@ Item {
                     font.wordSpacing: 0.4
                     selectionColor: "#b4a6039b"
                     anchors.leftMargin: 10
+
+                    Button {
+                        id: monitorOn
+                        x: 397
+                        y: -9
+                        width: 166
+                        height: 39
+                        text: qsTr("Monitorear")
+                        font.pixelSize: 12
+                        onClicked: {
+                            connector.monitor_mode(true)
+                            // recChannel1.visible = true
+                            // rectChannel2.visible = true
+                            // rectChannel3.visible = true
+                            }
+
+                    }
+                    Button {
+                        id: monitorOff
+                        x: 619
+                        y: -9
+                        width: 166
+                        height: 39
+                        text: qsTr("Stop")
+                        font.pixelSize: 12
+                        onClicked: {
+                            connector.monitor_mode(false)
+                            // recChannel1.visible = false
+                            // rectChannel2.visible = false
+                            // rectChannel3.visible = false
+                                    }
+                    }
                 }
                 FastBlur {
                     anchors.fill: signalsPlotArea
@@ -81,18 +114,35 @@ Item {
                     anchors.topMargin: 32
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 60
+                    ////////////////////////
+                    Rectangle {
+                        id: recChannel1
+                        color: "#f9f9f9"
+                        radius: 5
+                        border.color: "#00060000"
+                        border.width: 6   
+                        height: parent.height/3
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        // anchors.bottom: parent.bottom
+                        anchors.rightMargin: 4
+                        anchors.leftMargin: 4
+                        anchors.topMargin: 4
+                        // anchors.bottomMargin: parent.height - parent.height / 3 - 10
+                        
                     ChartView {
                         id: channel
                         legend.visible: false
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        // height: signalsPlotArea.height/3
                         backgroundColor: "transparent"
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        antialiasing: true
-                        anchors.topMargin: 0
-                        anchors.bottomMargin: parent.height - parent.height / 3 - 65
+                        anchors.fill: parent
+                        
+                        // anchors.left: parent.left
+                        // anchors.right: parent.right
+                        // anchors.top: parent.top
+                        // anchors.bottom: parent.bottom
+                        // anchors.bottomMargin: parent.height - parent.height / 3 - 10
+                        
                         ValuesAxis {
                             id: axisX
                             visible: false
@@ -103,6 +153,7 @@ Item {
 
                         ValuesAxis {
                             id: axisY
+                            visible: true
                             min: 3.4
                             max: 4.1
                             // gridLineColor: 'red'
@@ -111,7 +162,7 @@ Item {
                     }
                     Connections {
                         target: plotter
-                        function onSend(ser) {
+                        function onSend(series) {
                             plotter.get_series(channel.series(0))
                         }
                     }
@@ -126,13 +177,140 @@ Item {
                         source: channel
                         radius: 20
                     }
+                    }
+                    ///////////////////////////////////////
+                    Rectangle {
+                        id: rectChannel2
+                        color: "#f9f9f9"
+                        radius: 5
+                        height: recChannel1.height
+                        border.color: "#00060000"
+                        border.width: 6   
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: recChannel1.bottom
+                        anchors.topMargin: -20
+                        anchors.rightMargin: 4
+                        anchors.leftMargin: 4
+                        // anchors.bottomMargin: parent.height / 3
+
+                    ChartView {
+                        id: channel2
+                        legend.visible: false
+                        backgroundColor: "transparent"
+                        anchors.fill: parent
+                        // anchors.left: parent.left
+                        // anchors.right: parent.right
+                        
+                        // anchors.top: parent.top
+                        // anchors.bottom: parent.bottom
+                        // anchors.bottomMargin: parent.height - (parent.height / 3)*2 - 10
+                        ValuesAxis {
+                            id: axisX2
+                            visible: false
+                            min: 0.0
+                            max: 1600.0
+                            // gridLineColor: 'red'
+                        }
+
+                        ValuesAxis {
+                            id: axisY2
+                            visible: true
+                            min: 3
+                            max: 4.7
+                            // gridLineColor: 'red'
+                            // shadesVisible: true
+                        }
+                    }
+                    Connections {
+                        target: plotter2
+                        function onSend(series2) {
+                            plotter2.get_series(channel2.series(0))
+                        }
+                    }
+
+                    Component.onCompleted: {
+                        var series2 = channel2.createSeries(
+                                    ChartView.SeriesTypeLine, "Canal 2",
+                                    axisX2, axisY2)
+                    }
+                    FastBlur {
+                        anchors.fill: channel2
+                        source: channel2
+                        radius: 20
+                    }
+                }
+                //////////////////////////////////////
+                Rectangle {
+                        id: rectChannel3
+                        color: "#f9f9f9"
+                        radius: 5
+                        height: recChannel1.height
+                        border.color: "#00060000"
+                        border.width: 6   
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: rectChannel2.bottom
+                        anchors.topMargin: -20
+                        anchors.rightMargin: 4
+                        anchors.leftMargin: 4
+                        // anchors.bottomMargin: parent.height / 3
+
+                    ChartView {
+                        id: channel3
+                        legend.visible: false
+                        backgroundColor: "transparent"
+                        anchors.fill: parent
+                        // anchors.left: parent.left
+                        // anchors.right: parent.right
+                        
+                        // anchors.top: parent.top
+                        // anchors.bottom: parent.bottom
+                        // anchors.bottomMargin: parent.height - (parent.height / 3)*2 - 10
+                        ValuesAxis {
+                            id: axisX3
+                            visible: false
+                            min: 0.0
+                            max: 1600.0
+                            // gridLineColor: 'red'
+                        }
+
+                        ValuesAxis {
+                            id: axisY3
+                            visible: true
+                            min: 6.0
+                            max: 6.8
+                            // gridLineColor: 'red'
+                            // shadesVisible: true
+                        }
+                    }
+                    Connections {
+                        target: plotter3
+                        function onSend(series3) {
+                            plotter3.get_series(channel3.series(0))
+                        }
+                    }
+
+                    Component.onCompleted: {
+                        var series3 = channel3.createSeries(
+                                    ChartView.SeriesTypeLine, "Canal 3",
+                                    axisX3, axisY3)
+                    }
+                    FastBlur {
+                        anchors.fill: channel3
+                        source: channel3
+                        radius: 20
+                    }
                 }
 
+
+                }
                 Button {
                     id: initStudio
                     text: qsTr("Iniciar Estudio")
                     height: 45
                     font.pixelSize: 14
+                    font.italic: true
                     anchors.right: signalsPlotArea.right
                     anchors.top: signalsPlotArea.bottom
                     anchors.topMargin: 2
@@ -153,3 +331,8 @@ Item {
                 anchors.fill: parent
             }
         }
+/*##^##
+Designer {
+    D{i:0;autoSize:true;height:480;width:640}
+}
+##^##*/

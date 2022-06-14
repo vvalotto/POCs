@@ -56,9 +56,22 @@ class Plotter(QObject):
         pass
 
 
+class DeviceConnector(QObject):
+
+    def __init__(self, event) -> None:
+        super().__init__()
+        self._signal_to_connect = event
+    
+    @Slot(bool)
+    def holter_connect(self, flag):
+        if flag:
+            self._signal_to_connect.set()          
+
+
 class show_monitor():
-    def __init__(self, plotter: Plotter) -> None:
+    def __init__(self, plotter: Plotter, connector: DeviceConnector) -> None:
         self.plot = plotter
+        self._connector = connector
 
     def main(self):
         app = QApplication(sys.argv)
@@ -66,6 +79,7 @@ class show_monitor():
         engine.load(os.fspath(Path(__file__).resolve().parent / "main_monitor.qml"))
 
         # plot = Plotter()
+        engine.rootObjects()[0].setProperty('connector', self._connector)
         engine.rootObjects()[0].setProperty('plotter', self.plot)
 
         if not engine.rootObjects():

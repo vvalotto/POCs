@@ -80,7 +80,6 @@ class RespuestaHolter(metaclass=ABCMeta):
     
     PACKAGE_LENGTH = 13
     ANSWER_OK = b'\xa5\x0A\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xaf'
-    
 
     @property
     def paquete(self):
@@ -92,14 +91,13 @@ class RespuestaHolter(metaclass=ABCMeta):
         self._payload = None
         self._checksum = None
         self._datos = None
-        # self._datos = [b'x00' for i in range(self.PACKAGE_LENGTH)]
+        # self._datos = [b'x00' for i in range(self.PACKAGE_LENGTH)] # inicializarlo en 0
         self._correct_answer = False
 
     @abstractmethod
     def desarmar_respuesta(self, datos):
         pass
     
-    # @abstractmethod
     @property
     def authenticate_response (self):
         return self._correct_answer
@@ -121,7 +119,6 @@ class RespuestaHolter(metaclass=ABCMeta):
                 self._payload = datos[2:12]
                 self._checksum = checksum
                 self._datos = datos
-                print ("Checksum correcto.", datos)
             else: print('Error de paquete. Checksum incorrecto.')
         else: print ('Error de datos recibidos. "datos == None". Paquete no desarmado.')
 
@@ -174,10 +171,6 @@ class RespuestaHolterEGCMonitoreo(RespuestaHolter):
     def authenticate_response (self):
         pass
 
-    # def _recuperar_paquetes(self):
-    #     header_position = self._datos.index(self.HEADER)
-    #     while()
-
 class RespuestaHolterEvento(RespuestaHolter):
     pass
 
@@ -192,8 +185,6 @@ class RespuestaHolterEscritiuraOK(RespuestaHolter):
 
         self._correct_answer = False
 
-        # if not float.is_integer(len(datos)/self.PACKAGE_LENGTH):
-        #     self._
         for i in range (0, int (len(datos)/self.PACKAGE_LENGTH)):
             self._desarmar_paquete(datos[i*self.PACKAGE_LENGTH:(i+1)*self.PACKAGE_LENGTH])
             if self._datos == self.ANSWER_OK:

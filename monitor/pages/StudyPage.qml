@@ -17,7 +17,19 @@ Item {
                     anchors.topMargin: 10
                     anchors.leftMargin: 30
                 }
-                color: "#f4f4f4"
+                Text {
+                    id: descriptionStudy
+                    y: 74
+                    color: "#666666"
+                    text: "Ingrese los datos solicitados para registrar un nuevo estudio y luego presione el botón de <i>\"Avanzar\"</i>."
+                    anchors.left: titleEstudio.left
+                    anchors.bottom: titleEstudio.top
+                    font.pixelSize: 14
+                    verticalAlignment: Text.AlignVCenter
+                    anchors.leftMargin: 0
+                    anchors.bottomMargin: -80
+                }
+                color: "#f6f6f6"
                 anchors.fill: parent
             }
         }

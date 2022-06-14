@@ -1,6 +1,3 @@
-# from http.client import responses
-# from socket import timeout
-# from urllib import response
 from holter_comands import *
 from abc import ABCMeta, abstractmethod
 from holter_comands import *
@@ -40,9 +37,8 @@ class LectorStatusHolter(AbsComando):
         if not self.is_expected_response(paquete_recibido):
             self._destinatario.desenlazar()
             return
-        self._respuesta.desarmar_respuesta(paquete_recibido)
-        self._destinatario.desenlazar()
-        # return self._respuesta.guardar_estado()
+        # # # self._respuesta.desarmar_respuesta(paquete_recibido)
+        # # # self._destinatario.desenlazar()
         return
         
 
@@ -135,7 +131,7 @@ class BorrarMemoria(AbsComando):
 class HolterDisconnect(AbsComando):
 
     def ejecutar(self):
-        response = self._destinatario.recibir(1)
+        # response = self._destinatario.recibir(1)
         correct_response = self._respuesta.desarmar_respuesta(response)
         while (not correct_response):
             response = self._destinatario.recibir(1)

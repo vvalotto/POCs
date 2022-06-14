@@ -1,7 +1,7 @@
 from abc import abstractmethod, ABCMeta, ABC
 from importlib.resources import Package
 # from socket import timeout
-import time
+# import time
 
 import serial
 from serial.tools.list_ports import comports
@@ -103,11 +103,9 @@ class EnlaceUSB(AbsEnlace, ABC):
 
     def recibir(self, amount_packages):
         amount_bytes = self.PACKAGE_LENGTH * amount_packages
-        print ('cantiadad de bytes',amount_bytes)
         try:
             if self._puerto.isOpen():
                 recibido = self._puerto.read(amount_bytes)
-                print('mensaje recibido:', recibido)
                 return recibido
             else:
                 print ('No se recibieron datos. Puerto no enlazado')
@@ -181,7 +179,6 @@ class EnlaceDongle(AbsEnlace, ABC):
     def desconectar(self):
         try:
             # self._peer.disconnect().wait()
-            # print ('peer se desconectó')
             self._ble_device.close()
             print ('ble_device se desconectó')
             self._restart_parameters()
@@ -193,10 +190,8 @@ class EnlaceDongle(AbsEnlace, ABC):
 
     def recibir(self, amount_packages):
 
-        print ('en recibir ',self._datos)
-
         try:
-            print ('recibir', len(self._datos))
+            # print ('recibir', len(self._datos))
             if not float.is_integer(len(self._datos)/self.PACKAGE_LENGTH):
                 print ('Se perdieron datos. Se reiniciará la conexión')
                 self.desconectar()
